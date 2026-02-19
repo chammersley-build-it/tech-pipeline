@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --surface: #181c27;
+  --surface2: #1f2435;
+  --border: #2a3045;
+  --accent: #f0a500;
+  --blue: #3b82f6;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --text: #e2e8f0;
+  --muted: #64748b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+.header { background: var(--surface); border-bottom: 2px solid var(--accent); padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent); letter-spacing: 2px; }
+.header p { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.header-right { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.header-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; text-align: center; }
+.stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--accent); line-height: 1; }
+.stat-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.sync-status { font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); }
+.sync-status.live { color: var(--green); border-color: var(--green); background: rgba(34,197,94,0.1); }
+.sync-status.error { color: var(--red); border-color: var(--red); }
+
+.nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; }
+.tab { padding: 14px 20px; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; text-transform: uppercase; letter-spacing: 1px; transition: all 0.15s; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.main { padding: 28px 32px; }
+.view { display: none; }
+.view.active { display: block; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.card-head { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.card-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1px; }
+.card-days { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); background: var(--surface2); padding: 3px 10px; border-radius: 20px; }
+.card-body { padding: 16px 18px; }
+
+.dots { display: flex; gap: 5px; margin-bottom: 14px; flex-wrap: wrap; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); }
+.dot.done { background: var(--green); border-color: var(--green); }
+.dot.curr { background: var(--accent); border-color: var(--accent); }
+
+.wp-box { background: var(--surface2); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 6px 6px 0; margin-bottom: 12px; }
+.wp-box-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.wp-box-name { font-size: 0.88rem; font-weight: 600; margin-top: 2px; }
+
+.rep-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.rep-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+.rep-count { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--accent); }
+.bar-wrap { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+.bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+
+.metrics { display: flex; gap: 8px; margin-bottom: 12px; }
+.metric { flex: 1; background: var(--surface2); border-radius: 6px; padding: 8px; text-align: center; }
+.metric-val { font-family: 'DM Mono', monospace; font-size: 0.95rem; font-weight: 500; }
+.metric-label { font-size: 0.58rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.good { color: var(--green); }
+.warn { color: var(--yellow); }
+.bad { color: var(--red); }
+.blue { color: var(--blue); }
+
+.flags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.flag { font-size: 0.62rem; padding: 2px 8px; border-radius: 4px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
+.flag-green { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+.flag-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+.flag-blue { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+
+.tech-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.tech-btn { padding: 9px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.75rem; cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 1px; }
+.tech-btn:hover { border-color: var(--accent); color: var(--text); }
+.tech-btn.active { border-color: var(--accent); background: rgba(240,165,0,0.1); color: var(--accent); }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.detail-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.detail-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 14px; }
+.wp-list { list-style: none; }
+.wp-list li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+.wp-list li:last-child { border-bottom: none; }
+.wp-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; flex-shrink: 0; }
+.wp-icon.done { background: var(--green); color: #000; }
+.wp-icon.curr { background: var(--accent); color: #000; }
+.wp-icon.lock { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.rep-entry { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.78rem; gap: 8px; }
+.rep-entry:last-child { border-bottom: none; }
+.rep-date { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+.rep-note { flex: 1; color: var(--muted); font-size: 0.75rem; }
+.rep-result { font-family: 'DM Mono', monospace; font-size: 0.68rem; font-weight: 500; white-space: nowrap; }
+.pass { color: var(--green); }
+.fail { color: var(--red); }
+
+.form-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; max-width: 620px; }
+.form-wrap h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 18px; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.form-group select, .form-group input, .form-group textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.15s; }
+.form-group select:focus, .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); }
+.form-group textarea { resize: vertical; min-height: 70px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.radio-group { display: flex; gap: 20px; margin-top: 8px; }
+.radio-option { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; }
+.radio-option input { accent-color: var(--accent); }
+.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+.btn { display: inline-block; border: none; border-radius: 6px; padding: 11px 24px; font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; letter-spacing: 1px; cursor: pointer; transition: opacity 0.15s; }
+.btn:hover { opacity: 0.85; }
+.btn-gold { background: var(--accent); color: #000; }
+.btn-green { background: var(--green); color: #000; }
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-red { background: var(--red); color: #fff; }
+.export-btn { background: transparent; color: var(--blue); border: 1px solid var(--blue); border-radius: 6px; padding: 8px 18px; font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; transition: all 0.15s; }
+.export-btn:hover { background: rgba(59,130,246,0.1); }
+.view-toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+
+.chuck-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.chuck-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 0; }
+.chuck-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; color: var(--accent); margin-bottom: 16px; }
+.tl-item { margin-bottom: 12px; }
+.tl-head { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px; }
+.tl-eta { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--blue); }
+.tl-track { height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.tl-fill { height: 100%; border-radius: 4px; }
+.health-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+.health-row:last-child { border-bottom: none; }
+.health-val { font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; }
+.sum-table { width: 100%; border-collapse: collapse; }
+.sum-table th { text-align: left; font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.sum-table td { padding: 10px 10px; font-size: 0.8rem; border-bottom: 1px solid var(--border); }
+.sum-table tr:last-child td { border-bottom: none; }
+
+.loading { text-align: center; padding: 60px; font-family: 'DM Mono', monospace; color: var(--muted); font-size: 0.85rem; }
+.loading-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin: 0 3px; animation: bounce 1s infinite; }
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100%{transform:scale(0.8);opacity:0.5;} 40%{transform:scale(1.2);opacity:1;} }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #000; padding: 10px 20px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 500; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; }
+.toast.show { opacity: 1; }
+
+@media (max-width: 700px) {
+  .header { padding: 16px 18px; }
+  .main { padding: 18px; }
+  .nav { padding: 0 18px; overflow-x: auto; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .chuck-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Tech Pipeline</h1>
+    <p>Technician Development Tracker — Charlotte Operations</p>
+  </div>
+  <div class="header-right">
+    <div class="header-stats" id="headerStats"></div>
+    <span class="sync-status" id="syncStatus">Connecting...</span>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="tab active" id="tab-pipeline" onclick="showTab('pipeline')">Pipeline</div>
+  <div class="tab" id="tab-individual" onclick="showTab('individual')">Individual</div>
+  <div class="tab" id="tab-logrep" onclick="showTab('logrep')">Log Rep</div>
+  <div class="tab" id="tab-chuck" onclick="showTab('chuck')">Chuck View</div>
+</div>
+
+<div class="main">
+
+  <div class="view active" id="view-pipeline">
+    <div class="view-toolbar">
+      <button class="export-btn" onclick="exportPipeline()">&#8595; Export Pipeline</button>
+    </div>
+    <div id="pipelineGrid" class="grid">
+      <div class="loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span><br><br>Connecting to Firebase...</div>
+    </div>
+  </div>
+
+  <div class="view" id="view-individual">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+      <div class="tech-btns" id="techBtns"></div>
+      <button class="export-btn" onclick="exportIndividual()">&#8595; Export Individual</button>
+    </div>
+    <div class="detail-grid" id="detailGrid"></div>
+  </div>
+
+  <div class="view" id="view-logrep">
+    <div class="form-wrap">
+      <h3>Log a Rep</h3>
+      <div class="form-group">
+        <label>Technician</label>
+        <select id="fTech" onchange="onTechChange()"></select>
+      </div>
+      <div class="form-group">
+        <label>Waypoint</label>
+        <select id="fWaypoint"></select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="fDate">
+        </div>
+        <div class="form-group">
+          <label>Result</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="fResult" value="pass" checked> Pass</label>
+            <label class="radio-option"><input type="radio" name="fResult" value="fail"> Fail</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="fNote" placeholder="What did they diagnose? How was their reasoning?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Callback Rate % (if updated)</label>
+        <input type="number" id="fCallback" min="0" max="100" placeholder="e.g. 8">
+      </div>
+      <button class="btn btn-gold" onclick="logRep()">Save Rep to Cloud</button>
+
+      <hr class="divider">
+      <h3>Advance Waypoint</h3>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;">Only use when 10 consecutive passes are confirmed.</p>
+      <button class="btn btn-green" onclick="advanceWaypoint()">Mark Complete &amp; Advance</button>
+
+      <hr class="divider">
+      <h3>Edit Technician Record</h3>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;">Directly update any field for the selected technician. Use to correct errors or set starting values.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Callback Rate %</label>
+          <input type="number" id="eCallback" min="0" max="100" placeholder="e.g. 8">
+        </div>
+        <div class="form-group">
+          <label>Start Date (auto-calculates days)</label>
+          <input type="date" id="eStartDate">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Current Waypoint</label>
+          <select id="eWaypoint"></select>
+        </div>
+        <div class="form-group">
+          <label>Completed Waypoints (e.g. 0,1)</label>
+          <input type="text" id="eCompletedWP" placeholder="e.g. 0,1">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+        <button class="btn btn-gold" onclick="saveEdits()">Save Edits to Cloud</button>
+        <button class="btn" style="background:var(--surface2);color:var(--yellow);border:1px solid var(--yellow);" onclick="clearReps()">Clear All Reps (Reset to 0)</button>
+      </div>
+      <p style="font-size:0.7rem;color:var(--muted);">Clearing reps resets consecutive passes and rep log to zero. Cannot be undone.</p>
+
+      <hr class="divider">
+      <h3>Add New Technician</h3>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;">Creates a new technician in the pipeline starting at WP0.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="nName" placeholder="e.g. Marcus">
+        </div>
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" id="nStartDate">
+        </div>
+      </div>
+      <button class="btn btn-gold" onclick="addTech()">Add to Pipeline</button>
+
+      <hr class="divider">
+      <h3>Export Snapshot</h3>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;">Download all current data as a printable file.</p>
+      <button class="btn btn-blue" onclick="exportAll()">&#8595; Export Full Snapshot</button>
+
+      <hr class="divider">
+      <h3>Reset to Sample Data</h3>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:14px;">Overwrites Firebase with sample data. Use only for testing.</p>
+      <button class="btn btn-red" onclick="resetData()">Reset to Defaults</button>
+    </div>
+  </div>
+
+  <div class="view" id="view-chuck">
+    <div class="view-toolbar">
+      <button class="export-btn" onclick="exportChuck()">&#8595; Export Chuck Report</button>
+    </div>
+    <div class="chuck-grid">
+      <div class="chuck-card">
+        <h3>Deployment Timeline</h3>
+        <div id="chuckTimeline"></div>
+      </div>
+      <div class="chuck-card">
+        <h3>Pipeline Health</h3>
+        <div id="chuckHealth"></div>
+      </div>
+    </div>
+    <div class="chuck-card" style="margin-top:18px;">
+      <h3>Summary Table</h3>
+      <table class="sum-table" id="chuckTable"></table>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, getDocs, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBcnr4nSW2SjKoBlfI39nQbCBGjMP9Injk",
+  authDomain: "tech-pipeline.firebaseapp.com",
+  projectId: "tech-pipeline",
+  storageBucket: "tech-pipeline.firebasestorage.app",
+  messagingSenderId: "655139853216",
+  appId: "1:655139853216:web:854d6a6a69b2e570670ac5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+var WP = [
+  { id:0, name:'Technical Foundations',   short:'FOUND'  },
+  { id:1, name:'DX RTU (Straight Cool)',  short:'RTU-SC' },
+  { id:2, name:'Water Source Heat Pumps', short:'WSHP'   },
+  { id:3, name:'DX Heat Pumps',           short:'DX-HP'  },
+  { id:4, name:'AAON RTU w/ Reheat',      short:'AAON'   },
+  { id:5, name:'Pumps (Hydronic)',         short:'PUMPS'  },
+  { id:6, name:'Pool Heaters / Boilers',  short:'POOL'   },
+  { id:7, name:'Steam (Steamist)',         short:'STEAM'  }
+];
+
+var DEFAULTS = [
+  { name:'Frank',  days:123, currentWaypoint:1, completedWaypoints:[0], callbackRate:12, reps:[
+    { date:'2026-02-10', waypoint:1, result:'pass', note:'Good hypothesis on capacitor failure' },
+    { date:'2026-02-12', waypoint:1, result:'fail', note:'Could not identify refrigerant fault' },
+    { date:'2026-02-14', waypoint:1, result:'pass', note:'' },
+    { date:'2026-02-16', waypoint:1, result:'pass', note:'Solid reasoning' },
+    { date:'2026-02-17', waypoint:1, result:'pass', note:'' }
+  ]},
+  { name:'Zosh',   days:123, currentWaypoint:1, completedWaypoints:[0], callbackRate:9,  reps:[
+    { date:'2026-02-08', waypoint:1, result:'pass', note:'' },
+    { date:'2026-02-10', waypoint:1, result:'fail', note:'Skipped hypothesis step' },
+    { date:'2026-02-17', waypoint:1, result:'pass', note:'Better this time' }
+  ]},
+  { name:'Dion',   days:123, currentWaypoint:1, completedWaypoints:[0], callbackRate:7,  reps:[
+    { date:'2026-02-05', waypoint:1, result:'pass', note:'' },
+    { date:'2026-02-07', waypoint:1, result:'pass', note:'' },
+    { date:'2026-02-10', waypoint:1, result:'pass', note:'Strong diagnostic reasoning' },
+    { date:'2026-02-12', waypoint:1, result:'pass', note:'' },
+    { date:'2026-02-14', waypoint:1, result:'pass', note:'' },
+    { date:'2026-02-17', waypoint:1, result:'pass', note:'Ahead of pace' }
+  ]},
+  { name:'Robert', days:123, currentWaypoint:1, completedWaypoints:[0], callbackRate:15, reps:[
+    { date:'2026-02-12', waypoint:1, result:'pass', note:'' },
+    { date:'2026-02-15', waypoint:1, result:'fail', note:'Guessed without reasoning' },
+    { date:'2026-02-16', waypoint:1, result:'pass', note:'' },
+    { date:'2026-02-17', waypoint:1, result:'pass', note:'' }
+  ]}
+];
+
+var techs = [];
+var selTech = 0;
+
+// ── FIREBASE ──────────────────────────────────────────────────────────
+async function saveTech(tech) {
+  try {
+    await setDoc(doc(db, 'techs', tech.name), tech);
+  } catch(e) {
+    console.error('Save error:', e);
+    showToast('Save failed - check connection');
+  }
+}
+
+async function seedDefaults() {
+  for (var i = 0; i < DEFAULTS.length; i++) {
+    await setDoc(doc(db, 'techs', DEFAULTS[i].name), DEFAULTS[i]);
+  }
+}
+
+// Live listener - updates dashboard whenever Firebase data changes
+function startListener() {
+  var colRef = collection(db, 'techs');
+  onSnapshot(colRef, function(snapshot) {
+    if (snapshot.empty) {
+      // No data yet - seed defaults
+      seedDefaults();
+      return;
+    }
+    var loaded = [];
+    snapshot.forEach(function(d) { loaded.push(d.data()); });
+    // Sort: known order first, then alphabetical for new techs
+    var order = ['Frank','Zosh','Dion','Robert'];
+    loaded.sort(function(a,b) {
+      var ai = order.indexOf(a.name), bi = order.indexOf(b.name);
+      if (ai === -1 && bi === -1) return a.name.localeCompare(b.name);
+      if (ai === -1) ai = 999; if (bi === -1) bi = 999;
+      return ai - bi;
+    });
+    techs = loaded;
+    document.getElementById('syncStatus').textContent = 'Live';
+    document.getElementById('syncStatus').className = 'sync-status live';
+    renderAll();
+  }, function(err) {
+    console.error('Listener error:', err);
+    document.getElementById('syncStatus').textContent = 'Offline';
+    document.getElementById('syncStatus').className = 'sync-status error';
+  });
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function daysInProgram(tech) {
+  if (!tech.startDate) return tech.days || 0;
+  var start = new Date(tech.startDate + 'T00:00:00');
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  var diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  return diff < 0 ? 0 : diff;
+}
+
+function consecPasses(tech) {
+  var n = 0;
+  var reps = tech.reps.slice().reverse();
+  for (var i = 0; i < reps.length; i++) {
+    if (reps[i].result === 'pass') n++;
+    else break;
+  }
+  return n;
+}
+
+function progressPct(tech) {
+  var done = tech.completedWaypoints.length;
+  var curr = consecPasses(tech) / 10;
+  return Math.round(((done + curr) / WP.length) * 100);
+}
+
+function deployEst(tech) {
+  var remaining = WP.length - tech.completedWaypoints.length;
+  var ms = remaining * 90 * 24 * 60 * 60 * 1000;
+  return new Date(Date.now() + ms).toLocaleDateString('en-US', { month:'short', year:'numeric' });
+}
+
+function cbColor(r) { return r <= 10 ? 'good' : r <= 14 ? 'warn' : 'bad'; }
+
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 2500);
+}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────
+window.showTab = function(name) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('view-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'logrep') renderLogRep();
+};
+
+function renderAll() {
+  renderPipeline();
+  renderIndividual();
+  renderChuck();
+  var active = document.querySelector('.view.active');
+  if (active && active.id === 'view-logrep') renderLogRep();
+}
+
+// ── PIPELINE ──────────────────────────────────────────────────────────
+function renderPipeline() {
+  if (!techs.length) return;
+  var grid = document.getElementById('pipelineGrid');
+  var html = '';
+  for (var i = 0; i < techs.length; i++) {
+    var tech = techs[i];
+    var cp = consecPasses(tech);
+    var pct = Math.round((cp / 10) * 100);
+    var wpNow = WP[tech.currentWaypoint] || WP[0];
+    var deploy = deployEst(tech);
+    var prog = progressPct(tech);
+    var cb = cbColor(tech.callbackRate);
+    var days = daysInProgram(tech);
+
+    var dots = '';
+    for (var d = 0; d < WP.length; d++) {
+      var cls = 'dot';
+      if (tech.completedWaypoints.indexOf(WP[d].id) > -1) cls += ' done';
+      else if (WP[d].id === tech.currentWaypoint) cls += ' curr';
+      dots += '<div class="' + cls + '" title="' + WP[d].name + '"></div>';
+    }
+
+    var flagHtml = '';
+    if (cp >= 8) flagHtml += '<span class="flag flag-green">On Track</span>';
+    if (tech.callbackRate > 10) flagHtml += '<span class="flag flag-yellow">Callback High</span>';
+    if (days > 60 && cp < 3) flagHtml += '<span class="flag flag-yellow">Slow Progress</span>';
+
+    html += '<div class="card">'
+      + '<div class="card-head"><span class="card-name">' + tech.name + '</span><span class="card-days">' + days + ' days</span></div>'
+      + '<div class="card-body">'
+      + '<div class="dots">' + dots + '</div>'
+      + '<div class="wp-box"><div class="wp-box-label">Current Waypoint</div><div class="wp-box-name">WP' + tech.currentWaypoint + ' &mdash; ' + wpNow.name + '</div></div>'
+      + '<div class="rep-row"><span class="rep-label">Consecutive Passes</span><span class="rep-count">' + cp + ' / 10</span></div>'
+      + '<div class="bar-wrap"><div class="bar-fill" style="width:' + pct + '%"></div></div>'
+      + '<div class="metrics">'
+      + '<div class="metric"><div class="metric-val ' + cb + '">' + tech.callbackRate + '%</div><div class="metric-label">Callback</div></div>'
+      + '<div class="metric"><div class="metric-val">' + prog + '%</div><div class="metric-label">Progress</div></div>'
+      + '<div class="metric"><div class="metric-val blue" style="font-size:0.72rem;">' + deploy + '</div><div class="metric-label">Est. Deploy</div></div>'
+      + '</div>'
+      + (flagHtml ? '<div class="flags">' + flagHtml + '</div>' : '')
+      + '</div></div>';
+  }
+  grid.innerHTML = html;
+
+  var avgProg = 0, onTrack = 0, avgCB = 0;
+  for (var i = 0; i < techs.length; i++) {
+    avgProg += progressPct(techs[i]);
+    avgCB += techs[i].callbackRate;
+    if (consecPasses(techs[i]) >= 5) onTrack++;
+  }
+  avgProg = Math.round(avgProg / techs.length);
+  avgCB = Math.round(avgCB / techs.length);
+  document.getElementById('headerStats').innerHTML =
+    '<div class="stat"><div class="stat-num">' + techs.length + '</div><div class="stat-label">In Pipeline</div></div>'
+    + '<div class="stat"><div class="stat-num">' + onTrack + '</div><div class="stat-label">On Track</div></div>'
+    + '<div class="stat"><div class="stat-num">' + avgProg + '%</div><div class="stat-label">Avg Progress</div></div>'
+    + '<div class="stat"><div class="stat-num ' + cbColor(avgCB) + '">' + avgCB + '%</div><div class="stat-label">Avg Callback</div></div>';
+}
+
+// ── INDIVIDUAL ────────────────────────────────────────────────────────
+function renderIndividual() {
+  if (!techs.length) return;
+  var btns = document.getElementById('techBtns');
+  var bHtml = '';
+  for (var i = 0; i < techs.length; i++) {
+    bHtml += '<button class="tech-btn' + (i === selTech ? ' active' : '') + '" onclick="window.selectTech(' + i + ')">' + techs[i].name + '</button>';
+  }
+  btns.innerHTML = bHtml;
+  renderIndividualDetail();
+}
+
+function renderIndividualDetail() {
+  if (!techs.length) return;
+  var tech = techs[selTech];
+  var cp = consecPasses(tech);
+
+  var wpHtml = '';
+  for (var i = 0; i < WP.length; i++) {
+    var w = WP[i];
+    var iconCls = 'lock', iconTxt = '&#9675;', extra = '';
+    if (tech.completedWaypoints.indexOf(w.id) > -1) { iconCls = 'done'; iconTxt = '&#10003;'; }
+    else if (w.id === tech.currentWaypoint) { iconCls = 'curr'; iconTxt = '&#9658;'; extra = ' <span style="color:var(--accent);font-size:0.7rem;">' + cp + '/10</span>'; }
+    wpHtml += '<li><div class="wp-icon ' + iconCls + '">' + iconTxt + '</div><span>WP' + w.id + ' &mdash; ' + w.name + '</span>' + extra + '</li>';
+  }
+
+  var repArr = tech.reps.slice().reverse().slice(0, 15);
+  var repHtml = '';
+  for (var i = 0; i < repArr.length; i++) {
+    var r = repArr[i];
+    var s = WP[r.waypoint] ? WP[r.waypoint].short : '';
+    repHtml += '<div class="rep-entry">'
+      + '<span class="rep-date">' + r.date + '</span>'
+      + '<span class="rep-note">' + s + (r.note ? ' &mdash; ' + r.note : '') + '</span>'
+      + '<span class="rep-result ' + r.result + '">' + r.result.toUpperCase() + '</span>'
+      + '</div>';
+  }
+  if (!repHtml) repHtml = '<p style="color:var(--muted);font-size:0.8rem;padding:10px 0;">No reps logged yet.</p>';
+
+  document.getElementById('detailGrid').innerHTML =
+    '<div class="detail-card"><h3>Waypoint Progress</h3><ul class="wp-list">' + wpHtml + '</ul></div>'
+    + '<div class="detail-card"><h3>Recent Reps</h3>' + repHtml + '</div>';
+}
+
+window.selectTech = function(i) {
+  selTech = i;
+  renderIndividual();
+};
+
+// ── LOG REP ───────────────────────────────────────────────────────────
+function renderLogRep() {
+  if (!techs.length) return;
+  var fTech = document.getElementById('fTech');
+  var opts = '';
+  for (var i = 0; i < techs.length; i++) opts += '<option value="' + i + '">' + techs[i].name + '</option>';
+  fTech.innerHTML = opts;
+  fTech.value = selTech;
+  onTechChange();
+  var d = document.getElementById('fDate');
+  if (!d.value) d.value = new Date().toISOString().split('T')[0];
+  var nd = document.getElementById('nStartDate');
+  if (!nd.value) nd.value = new Date().toISOString().split('T')[0];
+}
+
+window.onTechChange = function() {
+  var i = parseInt(document.getElementById('fTech').value);
+  if (!techs[i]) return;
+  var tech = techs[i];
+  var opts = '';
+  for (var j = 0; j < WP.length; j++) {
+    opts += '<option value="' + WP[j].id + '"' + (WP[j].id === tech.currentWaypoint ? ' selected' : '') + '>WP' + WP[j].id + ' &mdash; ' + WP[j].name + '</option>';
+  }
+  document.getElementById('fWaypoint').innerHTML = opts;
+  document.getElementById('fCallback').value = tech.callbackRate;
+
+  // Populate edit fields
+  document.getElementById('eCallback').value = tech.callbackRate;
+  document.getElementById('eStartDate').value = tech.startDate || '';
+  document.getElementById('eCompletedWP').value = (tech.completedWaypoints || []).join(',');
+  var eWP = document.getElementById('eWaypoint');
+  var eOpts = '';
+  for (var j = 0; j < WP.length; j++) {
+    eOpts += '<option value="' + WP[j].id + '"' + (WP[j].id === tech.currentWaypoint ? ' selected' : '') + '>WP' + WP[j].id + ' &mdash; ' + WP[j].name + '</option>';
+  }
+  eWP.innerHTML = eOpts;
+};
+
+window.saveEdits = async function() {
+  var i = parseInt(document.getElementById('fTech').value);
+  var tech = JSON.parse(JSON.stringify(techs[i]));
+
+  var cb = document.getElementById('eCallback').value;
+  var wp = document.getElementById('eWaypoint').value;
+  var startDate = document.getElementById('eStartDate').value;
+  var completedRaw = document.getElementById('eCompletedWP').value;
+
+  if (cb !== '') tech.callbackRate = parseInt(cb);
+  if (wp !== '') tech.currentWaypoint = parseInt(wp);
+  if (startDate !== '') tech.startDate = startDate;
+  if (completedRaw.trim() !== '') {
+    tech.completedWaypoints = completedRaw.split(',').map(function(x){ return parseInt(x.trim()); }).filter(function(x){ return !isNaN(x); });
+  }
+
+  await saveTech(tech);
+  showToast('Record updated for ' + tech.name);
+};
+
+window.clearReps = async function() {
+  var i = parseInt(document.getElementById('fTech').value);
+  var tech = JSON.parse(JSON.stringify(techs[i]));
+  if (!confirm('Clear ALL reps for ' + tech.name + '? This resets consecutive passes to 0 and cannot be undone.')) return;
+  tech.reps = [];
+  await saveTech(tech);
+  showToast('Reps cleared for ' + tech.name);
+};
+  var i = parseInt(document.getElementById('fTech').value);
+  var tech = JSON.parse(JSON.stringify(techs[i]));
+  var resultEl = document.querySelector('input[name="fResult"]:checked');
+  var result = resultEl ? resultEl.value : 'pass';
+  var note = document.getElementById('fNote').value;
+  var date = document.getElementById('fDate').value;
+  var waypoint = parseInt(document.getElementById('fWaypoint').value);
+  var cb = document.getElementById('fCallback').value;
+
+  tech.reps.push({ date:date, waypoint:waypoint, result:result, note:note });
+  if (cb !== '') tech.callbackRate = parseInt(cb);
+
+  await saveTech(tech);
+  document.getElementById('fNote').value = '';
+  showToast('Rep saved to cloud for ' + tech.name);
+};
+
+window.advanceWaypoint = async function() {
+  var i = parseInt(document.getElementById('fTech').value);
+  var tech = JSON.parse(JSON.stringify(techs[i]));
+  var cp = consecPasses(tech);
+  if (cp < 10) { alert(tech.name + ' only has ' + cp + ' consecutive passes. 10 required.'); return; }
+  if (tech.completedWaypoints.indexOf(tech.currentWaypoint) === -1) tech.completedWaypoints.push(tech.currentWaypoint);
+  if (tech.currentWaypoint < WP.length - 1) tech.currentWaypoint++;
+  await saveTech(tech);
+  showToast(tech.name + ' advanced to WP' + tech.currentWaypoint);
+  onTechChange();
+};
+
+window.addTech = async function() {
+  var name = document.getElementById('nName').value.trim();
+  var startDate = document.getElementById('nStartDate').value;
+  if (!name) { alert('Please enter a name.'); return; }
+  if (!startDate) { alert('Please enter a start date.'); return; }
+  // Check for duplicate
+  for (var i = 0; i < techs.length; i++) {
+    if (techs[i].name.toLowerCase() === name.toLowerCase()) {
+      alert(name + ' already exists in the pipeline.'); return;
+    }
+  }
+  var newTech = {
+    name: name,
+    startDate: startDate,
+    currentWaypoint: 0,
+    completedWaypoints: [],
+    callbackRate: 0,
+    reps: []
+  };
+  await saveTech(newTech);
+  document.getElementById('nName').value = '';
+  document.getElementById('nStartDate').value = '';
+  showToast(name + ' added to pipeline');
+};
+
+window.resetData = async function() {
+  if (confirm('Reset Firebase to sample data? This overwrites everything.')) {
+    await seedDefaults();
+    showToast('Reset complete');
+  }
+};
+
+// ── CHUCK VIEW ────────────────────────────────────────────────────────
+function renderChuck() {
+  if (!techs.length) return;
+  var tl = document.getElementById('chuckTimeline');
+  var hl = document.getElementById('chuckHealth');
+  var tb = document.getElementById('chuckTable');
+  if (!tl) return;
+
+  var tlHtml = '';
+  for (var i = 0; i < techs.length; i++) {
+    var tech = techs[i];
+    var pct = progressPct(tech);
+    var deploy = deployEst(tech);
+    var col = pct >= 50 ? 'var(--green)' : pct >= 25 ? 'var(--accent)' : 'var(--blue)';
+    tlHtml += '<div class="tl-item">'
+      + '<div class="tl-head"><span><strong>' + tech.name + '</strong></span><span class="tl-eta">Est. ready: ' + deploy + '</span></div>'
+      + '<div class="tl-track"><div class="tl-fill" style="width:' + pct + '%;background:' + col + ';"></div></div>'
+      + '</div>';
+  }
+  tl.innerHTML = tlHtml;
+
+  var avgCB = 0, stuck = 0, advancing = 0;
+  for (var i = 0; i < techs.length; i++) {
+    avgCB += techs[i].callbackRate;
+    var cp = consecPasses(techs[i]);
+    if (cp === 0) stuck++;
+    if (cp >= 5) advancing++;
+  }
+  avgCB = Math.round(avgCB / techs.length);
+
+  hl.innerHTML =
+    '<div class="health-row"><span>Avg Callback Rate</span><span class="health-val ' + cbColor(avgCB) + '">' + avgCB + '%</span></div>'
+    + '<div class="health-row"><span>Actively Advancing</span><span class="health-val good">' + advancing + ' / ' + techs.length + '</span></div>'
+    + '<div class="health-row"><span>No Recent Passes</span><span class="health-val ' + (stuck > 0 ? 'bad' : 'good') + '">' + stuck + '</span></div>'
+    + '<div class="health-row"><span>Trainer Capacity (Max)</span><span class="health-val" style="color:var(--accent)">3</span></div>';
+
+  var tbHtml = '<thead><tr><th>Name</th><th>Days</th><th>Waypoint</th><th>Passes</th><th>Callback</th><th>Progress</th><th>Est. Deploy</th><th>Status</th></tr></thead><tbody>';
+  for (var i = 0; i < techs.length; i++) {
+    var tech = techs[i];
+    var cp = consecPasses(tech);
+    var wp = WP[tech.currentWaypoint] || WP[0];
+    var techDays = daysInProgram(tech);
+    var status = cp >= 8 ? '<span class="flag flag-green">On Track</span>' : (techDays > 60 && cp < 3 ? '<span class="flag flag-yellow">Needs Attention</span>' : '<span class="flag flag-blue">In Progress</span>');
+    tbHtml += '<tr>'
+      + '<td><strong>' + tech.name + '</strong></td>'
+      + '<td>' + techDays + '</td>'
+      + '<td>WP' + tech.currentWaypoint + ' &mdash; ' + wp.short + '</td>'
+      + '<td style="color:var(--accent);font-family:\'DM Mono\',monospace;">' + cp + '/10</td>'
+      + '<td class="' + cbColor(tech.callbackRate) + '" style="font-family:\'DM Mono\',monospace;">' + tech.callbackRate + '%</td>'
+      + '<td style="font-family:\'DM Mono\',monospace;">' + progressPct(tech) + '%</td>'
+      + '<td style="color:var(--blue);font-family:\'DM Mono\',monospace;">' + deployEst(tech) + '</td>'
+      + '<td>' + status + '</td>'
+      + '</tr>';
+  }
+  tbHtml += '</tbody>';
+  tb.innerHTML = tbHtml;
+}
+
+// ── EXPORTS ───────────────────────────────────────────────────────────
+function dlHTML(html, fname) {
+  var b = new Blob([html], {type:'text/html'});
+  var u = URL.createObjectURL(b);
+  var a = document.createElement('a');
+  a.href = u;
+  a.download = fname + '-' + new Date().toISOString().split('T')[0] + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(u); }, 1000);
+}
+
+function exportShell(title, body) {
+  var d = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>'
+    + 'body{font-family:Arial,sans-serif;padding:40px;color:#111;max-width:960px;margin:0 auto;}'
+    + 'h1{font-size:1.5rem;margin-bottom:4px;}h2{font-size:1rem;margin:24px 0 10px;border-bottom:2px solid #111;padding-bottom:4px;}'
+    + '.sub{color:#666;font-size:0.78rem;margin-bottom:28px;}'
+    + 'table{width:100%;border-collapse:collapse;margin-bottom:20px;}'
+    + 'th{background:#111;color:#fff;padding:9px 12px;text-align:left;font-size:0.72rem;text-transform:uppercase;letter-spacing:1px;}'
+    + 'td{padding:9px 12px;border-bottom:1px solid #e5e7eb;font-size:0.82rem;}'
+    + 'tr:last-child td{border-bottom:none;}'
+    + '.good{color:#16a34a;font-weight:600;}.warn{color:#d97706;font-weight:600;}.bad{color:#dc2626;font-weight:600;}'
+    + '.pass{color:#16a34a;font-weight:600;}.fail{color:#dc2626;font-weight:600;}'
+    + '.bar-bg{background:#f0f0f0;border-radius:4px;height:8px;margin-top:4px;}'
+    + '.bar-fg{height:8px;border-radius:4px;background:#f0a500;}'
+    + '.rep{display:flex;gap:16px;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:0.78rem;}'
+    + '.footer{margin-top:40px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:0.7rem;color:#999;}'
+    + '.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}'
+    + '.mb{border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center;}'
+    + '.mv{font-size:1.5rem;font-weight:700;}.ml{font-size:0.65rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}'
+    + '</style></head><body>'
+    + '<h1>' + title + '</h1>'
+    + '<div class="sub">Generated: ' + d + ' | Charlotte Operations | Confidential</div>'
+    + body
+    + '<div class="footer">Tech Pipeline Dashboard | Internal Use Only</div>'
+    + '</body></html>';
+}
+
+window.exportPipeline = function() {
+  if (!techs.length) return;
+  var avgCB=0, avgProg=0, onTrack=0;
+  for(var i=0;i<techs.length;i++){avgCB+=techs[i].callbackRate;avgProg+=progressPct(techs[i]);if(consecPasses(techs[i])>=5)onTrack++;}
+  avgCB=Math.round(avgCB/techs.length);avgProg=Math.round(avgProg/techs.length);
+  var rows='',bars='';
+  for(var i=0;i<techs.length;i++){
+    var t=techs[i],cp=consecPasses(t),wp=WP[t.currentWaypoint]||WP[0],p=progressPct(t),cb=t.callbackRate<=10?'good':t.callbackRate<=14?'warn':'bad',td=daysInProgram(t);
+    rows+='<tr><td><strong>'+t.name+'</strong></td><td>'+td+'</td><td>WP'+t.currentWaypoint+' - '+wp.name+'</td><td>'+cp+'/10</td><td class="'+cb+'">'+t.callbackRate+'%</td><td>'+p+'%</td><td>'+deployEst(t)+'</td></tr>';
+    bars+='<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px;"><strong>'+t.name+'</strong><span>'+p+'%</span></div><div class="bar-bg"><div class="bar-fg" style="width:'+p+'%"></div></div></div>';
+  }
+  var body='<div class="mg"><div class="mb"><div class="mv">'+techs.length+'</div><div class="ml">In Pipeline</div></div><div class="mb"><div class="mv '+(avgCB<=10?'good':'warn')+'">'+avgCB+'%</div><div class="ml">Avg Callback</div></div><div class="mb"><div class="mv">'+onTrack+'/'+techs.length+'</div><div class="ml">On Track</div></div><div class="mb"><div class="mv">'+avgProg+'%</div><div class="ml">Avg Progress</div></div></div><h2>Progress</h2>'+bars+'<h2>Pipeline Summary</h2><table><thead><tr><th>Name</th><th>Days</th><th>Waypoint</th><th>Passes</th><th>Callback</th><th>Progress</th><th>Est. Deploy</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  dlHTML(exportShell('Pipeline Overview', body), 'pipeline');
+  showToast('Pipeline exported');
+};
+
+window.exportIndividual = function() {
+  if (!techs.length) return;
+  var tech=techs[selTech],cp=consecPasses(tech),cb=cbColor(tech.callbackRate);
+  var wpRows='';
+  for(var i=0;i<WP.length;i++){var w=WP[i],done=tech.completedWaypoints.indexOf(w.id)>-1,curr=w.id===tech.currentWaypoint;var status=done?'Complete':curr?'In Progress ('+cp+'/10)':'Locked';wpRows+='<tr'+(curr?' style="font-weight:600;"':'')+'>  <td>WP'+w.id+'</td><td>'+w.name+'</td><td>'+status+'</td></tr>';}
+  var repRows='';var rr=tech.reps.slice().reverse();
+  for(var i=0;i<rr.length;i++){var r=rr[i],s=WP[r.waypoint]?WP[r.waypoint].short:'';repRows+='<div class="rep"><span style="color:#666;min-width:90px;">'+r.date+'</span><span style="min-width:60px;">'+s+'</span><span style="flex:1;">'+(r.note||'-')+'</span><span class="'+r.result+'">'+r.result.toUpperCase()+'</span></div>';}
+  var body='<div class="mg"><div class="mb"><div class="mv">'+daysInProgram(tech)+'</div><div class="ml">Days In</div></div><div class="mb"><div class="mv '+cb+'">'+tech.callbackRate+'%</div><div class="ml">Callback</div></div><div class="mb"><div class="mv">'+progressPct(tech)+'%</div><div class="ml">Progress</div></div><div class="mb"><div class="mv">'+deployEst(tech)+'</div><div class="ml">Est. Deploy</div></div></div><h2>Waypoints</h2><table><thead><tr><th>#</th><th>Waypoint</th><th>Status</th></tr></thead><tbody>'+wpRows+'</tbody></table><h2>Rep Log</h2>'+(repRows||'<p>No reps logged.</p>');
+  dlHTML(exportShell('Individual: '+tech.name, body), 'individual-'+tech.name.toLowerCase());
+  showToast(tech.name + ' exported');
+};
+
+window.exportAll = function() {
+  if (!techs.length) return;
+  var rows='',repSections='';
+  for(var i=0;i<techs.length;i++){var t=techs[i],cp=consecPasses(t),wp=WP[t.currentWaypoint]||WP[0],cb=t.callbackRate<=10?'good':t.callbackRate<=14?'warn':'bad',td=daysInProgram(t);rows+='<tr><td><strong>'+t.name+'</strong></td><td>'+td+'</td><td>WP'+t.currentWaypoint+' - '+wp.name+'</td><td>'+cp+'/10</td><td class="'+cb+'">'+t.callbackRate+'%</td><td>'+progressPct(t)+'%</td><td>'+deployEst(t)+'</td></tr>';var rr=t.reps.slice().reverse(),rHtml='';for(var j=0;j<rr.length;j++){var r=rr[j],s=WP[r.waypoint]?WP[r.waypoint].short:'';rHtml+='<div class="rep"><span style="color:#666;min-width:90px;">'+r.date+'</span><span style="min-width:60px;">'+s+'</span><span style="flex:1;">'+(r.note||'-')+'</span><span class="'+r.result+'">'+r.result.toUpperCase()+'</span></div>';}repSections+='<h2>'+t.name+' - Reps</h2>'+(rHtml||'<p>No reps.</p>');}
+  var body='<h2>Pipeline Summary</h2><table><thead><tr><th>Name</th><th>Days</th><th>Waypoint</th><th>Passes</th><th>Callback</th><th>Progress</th><th>Est. Deploy</th></tr></thead><tbody>'+rows+'</tbody></table>'+repSections;
+  dlHTML(exportShell('Full Pipeline Snapshot', body), 'full-snapshot');
+  showToast('Full snapshot exported');
+};
+
+window.exportChuck = function() {
+  if (!techs.length) return;
+  var avgCB=0,stuck=0,advancing=0;
+  for(var i=0;i<techs.length;i++){avgCB+=techs[i].callbackRate;var cp=consecPasses(techs[i]);if(cp===0)stuck++;if(cp>=5)advancing++;}
+  avgCB=Math.round(avgCB/techs.length);
+  var bars='',rows='';
+  for(var i=0;i<techs.length;i++){var t=techs[i],p=progressPct(t),d=deployEst(t),cp=consecPasses(t),wp=WP[t.currentWaypoint]||WP[0],td=daysInProgram(t);bars+='<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:4px;"><strong>'+t.name+'</strong><span style="color:#2563eb;">Est: '+d+'</span></div><div class="bar-bg"><div class="bar-fg" style="width:'+p+'%;background:'+(p>=50?'#16a34a':p>=25?'#f0a500':'#2563eb')+'"></div></div></div>';var status=cp>=8?'On Track':td>60&&cp<3?'Needs Attention':'In Progress';rows+='<tr><td><strong>'+t.name+'</strong></td><td>'+td+'</td><td>WP'+t.currentWaypoint+' - '+wp.short+'</td><td>'+cp+'/10</td><td class="'+(t.callbackRate<=10?'good':t.callbackRate<=14?'warn':'bad')+'">'+t.callbackRate+'%</td><td>'+p+'%</td><td>'+d+'</td><td>'+status+'</td></tr>';}
+  var body='<div class="mg"><div class="mb"><div class="mv">'+techs.length+'</div><div class="ml">In Pipeline</div></div><div class="mb"><div class="mv '+(avgCB<=10?'good':'warn')+'">'+avgCB+'%</div><div class="ml">Avg Callback</div></div><div class="mb"><div class="mv">'+advancing+'/'+techs.length+'</div><div class="ml">Advancing</div></div><div class="mb"><div class="mv '+(stuck>0?'bad':'good')+'">'+stuck+'</div><div class="ml">Stuck</div></div></div><h2>Deployment Timeline</h2>'+bars+'<h2>Full Summary</h2><table><thead><tr><th>Name</th><th>Days</th><th>WP</th><th>Passes</th><th>Callback</th><th>Progress</th><th>Est. Deploy</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  dlHTML(exportShell('Executive Summary - Tech Pipeline', body), 'chuck-report');
+  showToast('Chuck report exported');
+};
+
+// ── START ─────────────────────────────────────────────────────────────
+startListener();
+</script>
+</body>
+</html>
