@@ -657,6 +657,8 @@ window.clearReps = async function() {
   await saveTech(tech);
   showToast('Reps cleared for ' + tech.name);
 };
+
+window.logRep = async function() {
   var i = parseInt(document.getElementById('fTech').value);
   var tech = JSON.parse(JSON.stringify(techs[i]));
   var resultEl = document.querySelector('input[name="fResult"]:checked');
